@@ -95,11 +95,12 @@ colorscheme molokai
 nnoremap <leader>n :NERDTreeFocus<CR>
 nnoremap <C-n> :NERDTree<CR>
 nnoremap <C-t> :NERDTreeToggle<CR>
-nnoremap <C-f> :NERDTreeFind<CR>
+nnoremap <C-f> :Rg <CR>
+nnoremap <A-f> :FZF <CR>
 ""nnoremap tn :tabnew<Space>
 nnoremap <C-Left> :wincmd h <CR>
 nnoremap <C-Up> :wincmd k <CR>
-unmap <C-Down>
+"" unmap <C-Down>
 nnoremap <C-Down> :wincmd j <CR>
 nnoremap <C-Right> :wincmd l <CR>
 ""nnoremap tc :tabclose<CR>
@@ -115,7 +116,7 @@ nnoremap <C-p><C-p> Oimport pdb;pdb.set_trace()<ESC>
 let g:python_highlight_all = 1
 set showmatch
 set ignorecase
-set mouse=v
+"" set mouse=v
 set hlsearch
 set incsearch
 set tabstop=4
@@ -126,7 +127,7 @@ set autoindent
 set wildmode=longest,list
 set cc=120
 filetype plugin indent on
-set mouse==a
+"" set mouse==a
 filetype plugin on
 set cursorline
 set ttyfast
