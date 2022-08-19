@@ -1,0 +1,1 @@
+/home/izdemon/.config/nvim/init.vim
