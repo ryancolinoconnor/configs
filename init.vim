@@ -36,10 +36,15 @@ call plug#begin()
 " different version somewhere else.
 " Plugin 'ascenator/L9', {'name': 'newL9'}
 " Plug 'YouCompleteMe'
+Plug 'kyazdani42/nvim-tree.lua'
+Plug 'numirias/semshi', {'do': ':UpdateRemotePlugins'}
 Plug 'tpope/vim-fugitive'
 Plug 'flazz/vim-colorschemes'
+Plug 'folke/tokyonight.nvim', {'branch':'main'}
 Plug 'jalvesaq/vimcmdline'
-Plug 'preservim/nerdtree'
+Plug 'terrortylor/nvim-comment'
+Plug 'lewis6991/impatient.nvim'
+""Plug 'preservim/nerdtree'
 Plug 'vim-python/python-syntax'
 Plug 'neovimhaskell/haskell-vim'
 Plug 'nvim-lualine/lualine.nvim'
@@ -110,18 +115,24 @@ let cmdline_app['py'] = '~/tensorflow_macos_venv/bin/python3'
 colorscheme molokai
 
 " Nerd Tree cfg
-nnoremap <leader>n :NERDTreeFocus<CR>
 nnoremap <C-q> :lua require("persistence").load()<CR>
-nnoremap <C-n> :NERDTree<CR>
-nnoremap <C-t> :NERDTreeToggle<CR>
+nnoremap <C-n> :NvimTree<CR>
 ""unmap <C-f>
 map <C-f> :Rg <CR>
 nnoremap <A-f> :FZF <CR>
 ""nnoremap tn :tabnew<Space>
+nnoremap <A-Left> :bp <CR>
+nnoremap <A-Right> :bn <CR>
+nnoremap <A-,> zm <CR>
+nnoremap <A-.> za <CR>
+nnoremap <A-x> :bd <CR>
+nnoremap <"> :split <CR>
+nnoremap <%> :vsplit <CR>
 nnoremap <C-Left> :TmuxNavigateLeft <CR>
 nnoremap <C-Up> :TmuxNavigateUp <CR>
 nnoremap <C-Down> :TmuxNavigateDown <CR>
 nnoremap <C-Right> :TmuxNavigateRight <CR>
+nnoremap <A-c> :CommentToggle <CR>
 "" old
 "" nnoremap <C-Left> :wincmd h <CR>
 "" nnoremap <C-Up> :wincmd k <CR>
@@ -135,7 +146,7 @@ nnoremap <C-Alt-Left> :wincmd < <CR>
 ""nnoremap tc :tabclose<CR>
 ""nnoremap tC :tabclose!<CR>
 set tabstop=2 shiftwidth=2 expandtab
-autocmd VimEnter * NERDTree
+autocmd VimEnter * NvimTreeFocus
 syntax on
 autocmd VimEnter * wincmd p
 
@@ -308,8 +319,25 @@ nnoremap <silent><nowait> <space>j  :<C-u>CocNext<CR>
 nnoremap <silent><nowait> <space>k  :<C-u>CocPrev<CR>
 " Resume latest coc list.
 nnoremap <silent><nowait> <space>p  :<C-u>CocListResume<CR>
+let g:semshi#filetypes = ['python']
 set termguicolors
+set foldmethod=expr
+set foldexpr=nvim_treesitter#foldexpr()
+colorscheme tokyonight-night
 lua << EOF
+  vim.g.loaded = 1
+  vim.g.loaded_netrwPlugin = 1
+  require("nvim-tree").setup{
+    remove_keymaps={"<C-t>"}
+     }
+  require('nvim_comment').setup{}
+  require 'nvim-treesitter.configs'.setup{
+  	ensure_installed={"haskell","python"},
+  	highlight = {
+
+		enable=true
+		}
+  }
   require("bufferline").setup{}
   require("persistence").setup {
     -- your configuration comes here
@@ -319,6 +347,9 @@ lua << EOF
   require('lualine').setup{
   options={
   icons_enabled= true,
-  theme='auto'
-  }}
+  theme='tokyonight',
+  path=1
+  }
+  }
 EOF
+nnoremap <C-t> :NvimTreeToggle<CR>
