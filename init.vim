@@ -36,6 +36,8 @@ call plug#begin()
 " different version somewhere else.
 " Plugin 'ascenator/L9', {'name': 'newL9'}
 " Plug 'YouCompleteMe'
+Plug 'ggandor/leap.nvim'
+Plug 'akinsho/toggleterm.nvim'
 Plug 'kyazdani42/nvim-tree.lua'
 Plug 'numirias/semshi', {'do': ':UpdateRemotePlugins'}
 Plug 'tpope/vim-fugitive'
@@ -48,8 +50,11 @@ Plug 'lewis6991/impatient.nvim'
 Plug 'vim-python/python-syntax'
 Plug 'neovimhaskell/haskell-vim'
 Plug 'nvim-lualine/lualine.nvim'
-Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
-Plug 'junegunn/fzf.vim'
+Plug 'nvim-lua/plenary.nvim'
+Plug 'nvim-telescope/telescope.nvim', {'tag' :'0.1.0'}
+Plug 'jpalardy/vim-slime'
+""Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
+""Plug 'junegunn/fzf.vim'
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
 Plug 'ryanoasis/vim-devicons'
 Plug 'akinsho/bufferline.nvim', {'tag':'v2.9.1'}
@@ -57,16 +62,30 @@ Plug 'nvim-treesitter/nvim-treesitter',{'do': ':TSUpdate'}
 Plug 'folke/persistence.nvim' "lets you save a session
 Plug 'kkoomen/vim-doge', {'do':{->doge#install()}} "docstring
 Plug 'christoomey/vim-tmux-navigator'
+Plug 'ldelossa/gh.nvim'
+Plug 'ldelossa/litee.nvim'
+Plug 'anuvyklack/pretty-fold.nvim'
+Plug 'anuvyklack/keymap-amend.nvim'
+Plug 'anuvyklack/fold-preview.nvim'
 " Plug 'feline-nvim/feline.nvim', {'branch':'0.5-compat'}
 " -Plug 'neoclide/coc.nvim'
 :"" Plug 'codeape2/vim-multiple-monitors'
 " All of your Plugins must be added before the following line
 "Plug 'thaerkh/vim-workspace'
 call plug#end()            " required
+let g:doge_doc_standard_python = 'numpy'
 syntax on
 let g:workspace_autocreate = 1
 set laststatus=2
 nnoremap <leader>s :ToggleWorkspace<CR>
+nnoremap <leader>c :w <CR>:SlimeSend0 ':l '.expand('%:t') <CR>
+let g:slime_default_config = {"socket_name": "default", "target_pane": ":1"}
+let g:slime_default_config = {"socket_name": get(split($TMUX, ","), 0), "target_pane": ":.1"}
+let g:slime_dont_ask_default=1
+autocmd TermEnter term://*toggleterm#*
+    \ tnoremap <silent><c-g> <Cmd>exe v:count1 . "ToggleTerm" <CR>
+nnoremap <silent><c-g> <Cmd>exe v:count1 . "ToggleTerm"<CR>
+inoremap <silent><c-g> <Esc><Cmd>exe v:count1 . "ToggleTerm"<CR>
 let g:workspace_session_name = 'Session.vim'
 let g:workspace_session_directory = $HOME . '/.vim/sessions/'
 let g:workspace_autosave_always = 1
@@ -118,13 +137,14 @@ colorscheme molokai
 nnoremap <C-q> :lua require("persistence").load()<CR>
 nnoremap <C-n> :NvimTree<CR>
 ""unmap <C-f>
-map <C-f> :Rg <CR>
-nnoremap <A-f> :FZF <CR>
+map <C-f> :Telescope live_grep <CR>
+nnoremap <A-f> :Telescope find_files  <CR>
+nnoremap <A-a> :!black % <CR>
 ""nnoremap tn :tabnew<Space>
 nnoremap <A-Left> :bp <CR>
 nnoremap <A-Right> :bn <CR>
 nnoremap <A-,> zm <CR>
-nnoremap <A-.> za <CR>
+nnoremap <A-.> zA <CR> k<CR>
 nnoremap <A-x> :bd <CR>
 nnoremap <"> :split <CR>
 nnoremap <%> :vsplit <CR>
@@ -133,6 +153,7 @@ nnoremap <C-Up> :TmuxNavigateUp <CR>
 nnoremap <C-Down> :TmuxNavigateDown <CR>
 nnoremap <C-Right> :TmuxNavigateRight <CR>
 nnoremap <A-c> :CommentToggle <CR>
+vnoremap <A-c> :'<,'>CommentToggle <CR>
 "" old
 "" nnoremap <C-Left> :wincmd h <CR>
 "" nnoremap <C-Up> :wincmd k <CR>
@@ -327,9 +348,31 @@ colorscheme tokyonight-night
 lua << EOF
   vim.g.loaded = 1
   vim.g.loaded_netrwPlugin = 1
+  require("toggleterm").setup{}
   require("nvim-tree").setup{
     remove_keymaps={"<C-t>"}
      }
+  require('leap').setup{
+      max_aot_targets = nil,
+      highlight_unlabeled = false,
+      max_highlighted_traversal_targets = 10,
+      case_sensitive = false,
+      -- Sets of characters that should match each other.
+      -- Obvious candidates are braces and quotes ('([{', ')]}', '`"\'').
+      equivalence_classes = { ' \t\r\n', },
+      -- Leaving the appropriate list empty effectively disables "smart" mode,
+      -- and forces auto-jump to be on or off.
+      safe_labels = { . . . },
+      labels = { . . . },
+      special_keys = {
+        repeat_search  = '<enter>',
+        next_aot_match = '<enter>',
+        next_match     = {';', '<enter>'}
+        prev_match     = {',', '<tab>'}
+        next_group     = '<space>',
+        prev_group     = '<tab>',
+      },
+    }
   require('nvim_comment').setup{}
   require 'nvim-treesitter.configs'.setup{
   	ensure_installed={"haskell","python"},
@@ -344,6 +387,10 @@ lua << EOF
     -- or leave it empty to use the default settings
     -- refer to the configuration section below
 }
+  require('pretty-fold').setup{}
+  local keymap = vim.keymap
+  keymap.amend = require('keymap-amend')
+  require('fold-preview').setup{}
   require('lualine').setup{
   options={
   icons_enabled= true,
@@ -353,3 +400,8 @@ lua << EOF
   }
 EOF
 nnoremap <C-t> :NvimTreeToggle<CR>
+nnoremap <A-z> :ToggleTermSendCurrentLine<CR>
+nnoremap <A-x> :ToggleTermSendVisualLines<CR>
+let g:slime_target="tmux"
+let g:slime_haskell_ghci_add_let = 0
+let g:slime_python_ipython = 1
